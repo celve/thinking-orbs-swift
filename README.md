@@ -45,6 +45,7 @@ swift test                                    # 43 tests, including all 72 golde
 Scripts/smoke.sh                              # tables are current; all 36 frames rasterise
 Scripts/generate-tables.sh                    # after re-vendoring Spec/
 swift run OrbsSnapshot out/                   # frozen frames to eyeball against the web demo
+swift run OrbsSnapshot out/ --animate         # looping GIFs, one per state plus a sheet of all nine
 ```
 
 Two comparisons are deliberately not strict, and both are documented where they live. Preset
@@ -63,7 +64,7 @@ everything else is ordered strictly.
 | `ThinkingOrbsGeometry` | The engine: primitives, the nine modes, preset scaling. Foundation only, so the golden vectors run headlessly. |
 | `ThinkingOrbs` | The SwiftUI binding — the view, the clock, the thirty-line painter. |
 | `OrbsCodegen` | Turns `Spec/orbs-spec.json` into the generated tables. Not a product. |
-| `OrbsSnapshot` | Frozen frames as PNGs, named as upstream's parity harness names them. Not a product. |
+| `OrbsSnapshot` | Frozen frames as PNGs, named as upstream's parity harness names them, and looping GIFs under `--animate`. Not a product. |
 
 `Spec/` is vendored from upstream at the commit named in `Spec/UPSTREAM`; `Reference/` is its
 engine verbatim, kept so the transcription can be reviewed side by side. Only the base profiles,
