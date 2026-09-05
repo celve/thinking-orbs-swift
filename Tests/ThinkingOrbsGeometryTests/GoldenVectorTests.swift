@@ -4,7 +4,7 @@ import Testing
 
 /// Modes still to be transcribed. Each phase removes entries; `unportedModesProduceNothing`
 /// guards the other direction, so a mode cannot half-land and go unnoticed.
-private let unported: Set<OrbMode> = [.orbits, .rubik, .wave, .web, .braid, .morph]
+private let unported: Set<OrbMode> = [.web, .morph]
 
 private let portedCases = Golden.cases.filter { !unported.contains($0.mode) }
 
