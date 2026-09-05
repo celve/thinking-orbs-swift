@@ -1,9 +1,10 @@
 remote  https://github.com/Jakubantalik/thinking-orbs
-tag     v0.3.1
 commit  de85557ca220332586d070d8788c0e1d6e877a0d
+tag     v0.3.1 is bd204b73c9b6660fad7210b1ad48d9dc2adbb89d, three commits earlier; a demo
+        link and two favicon changes separate them, and neither src/ nor spec/ differs.
 
-orbs-spec.json and orbs-golden.json are copied verbatim from that commit's spec/ directory,
-and Reference/ mirrors its src/. Regenerate upstream with
+orbs-spec.json and orbs-golden.json are copied verbatim from that commit's spec/ directory, and
+every `Ported from` header in Sources/ names a file in its src/. Regenerate upstream with
 
     npx tsx scripts/extract-spec.ts && npx tsx scripts/extract-golden.ts
 

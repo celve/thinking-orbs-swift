@@ -1,5 +1,6 @@
 thinking-orbs — https://github.com/Jakubantalik/thinking-orbs
-Used for: the geometry engine, ported to Swift in Sources/ThinkingOrbsGeometry/
+Used for: Spec/ holds two of its files verbatim; Sources/ThinkingOrbsGeometry/ and
+Sources/ThinkingOrbs/ are transcribed from its src/.
 
 MIT License
 

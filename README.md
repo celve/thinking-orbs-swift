@@ -95,9 +95,9 @@ Run `swift run -c release OrbsSnapshot --bench` for the geometry figures.
 | `OrbsCodegen` | Turns `Spec/orbs-spec.json` into the generated tables. Not a product. |
 | `OrbsSnapshot` | Frozen frames as PNGs, named as upstream's parity harness names them, and looping GIFs under `--animate`. Not a product. |
 
-`Spec/` is vendored from upstream at the commit named in `Spec/UPSTREAM`; `Reference/` is its
-engine verbatim, kept so the transcription can be reviewed side by side. Only the base profiles,
-the preset table and the option keys are generated — the scaling rules are hand-ported, because
+`Spec/` is vendored from upstream at the commit named in `Spec/UPSTREAM`. The TypeScript it was
+transcribed from is not vendored, so reviewing a mode side by side means checking that commit out.
+Only the base profiles, the preset table and the option keys are generated — the scaling rules are hand-ported, because
 the spec states them only in prose, and it omits three things the golden data depends on.
 
 ## Credits
