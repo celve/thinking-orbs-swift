@@ -3,6 +3,11 @@
 Dotted thought-orb loading indicators for Swift: nine hand-tuned states, two sizes, plain
 greyscale circles on a SwiftUI canvas.
 
+![The nine states, animated](Docs/nine-states.gif)
+
+Rendered by this package with `swift run OrbsSnapshot out/ --animate`, on a dark substrate at
+20fps. Each loop runs at its own state's baked speed, so the relative pacing is what you get.
+
 A **state** is one verb an agent can be doing — searching, solving, weaving — drawn as a
 genuinely 3D field of dots that carries depth in dot size and ink weight alone. There are no
 gradients, no filters and no shaders anywhere in it. This is a port of
