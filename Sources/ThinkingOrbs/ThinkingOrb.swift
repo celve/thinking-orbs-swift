@@ -17,6 +17,7 @@ public struct ThinkingOrb: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.orbTime) private var frozenTime
+    @Environment(\.orbFrameRate) private var frameRate
     @ObservedObject private var visibility = OrbVisibility.shared
 
     public init(
@@ -58,6 +59,11 @@ public struct ThinkingOrb: View {
             // of the last evaluation, which is the nearest stateless equivalent — and because the
             // clock is absolute, an orb that stopped while hidden comes back in phase.
             canvas(at: OrbClock.now * effectiveSpeed)
+        } else if let frameRate, frameRate > 0 {
+            // Anchored to the shared epoch, so a fixed rate keeps instances in phase too.
+            TimelineView(.periodic(from: OrbClock.epoch, by: 1 / frameRate)) { timeline in
+                canvas(at: timeline.date.timeIntervalSince(OrbClock.epoch) * effectiveSpeed)
+            }
         } else {
             TimelineView(.animation) { timeline in
                 canvas(at: timeline.date.timeIntervalSince(OrbClock.epoch) * effectiveSpeed)

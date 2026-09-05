@@ -29,6 +29,7 @@ apart they were created, and `accessibilityReduceMotion` renders a single static
 
 ```swift
 GalleryView().orbTime(0.6)                    // freeze a whole subtree at one instant
+SidebarView().orbFrameRate(30)                // redraw at a fixed rate instead of the display's
 ```
 
 `orbTime` is needed, not merely convenient, whenever an orb is rendered into a still image:
@@ -59,25 +60,31 @@ everything else is ordered strictly.
 
 ## What it costs
 
-Measured on an M4 at 60Hz, in release, as a percentage of one core:
+Measured on an M4 at 60Hz, release, as a percentage of one core, from a live window:
 
-| | CPU |
-| --- | --- |
-| one orb animating | ~5.8% |
-| nine orbs animating | ~12.5% |
-| any number, frozen with `orbTime` | 0% |
+| | one orb | nine orbs |
+| --- | --- | --- |
+| display-linked (the default) | 5.8% | 16.1% |
+| `orbFrameRate(30)` | | 14.2% |
+| `orbFrameRate(15)` | | 12.0% |
+| frozen with `orbTime` | 0% | **0%** |
 
-Geometry is a small part of that — the worst state, `composing` at 64pt, rebuilds all 566 dots in
-0.153 ms, which is 0.9% of a core at 60fps. The rest is SwiftUI redrawing and compositing a canvas
-sixty times a second, so the marginal cost of a second orb is far below the first one's.
+Geometry is a small part of that: the worst state, `composing` at 64pt, rebuilds all 566 dots in
+0.153 ms, or 0.9% of a core at 60fps. The rest is SwiftUI redrawing and compositing.
+
+**Halving the frame rate does not halve the cost** — 60 to 30 saves about a tenth. The saving only
+becomes large well below useful rates, so the knob is worth reaching for on a busy screen and is
+not worth trading smoothness for otherwise. The one reliable lever is not animating: a frozen orb
+costs nothing measurable.
 
 `TimelineView(.animation)` keeps redrawing a window that is minimised or off screen, so an orb
-left running is a cost that continues when nobody can see it. The view stops animating while the
-application reports itself occluded, but that gate fails open — it starts animating and only stops
-on an observed transition — so a host that wants a guarantee should pass `paused`, or freeze with
-`orbTime`, which measures at zero. Reduced motion already renders one static frame.
+left running costs the same when nobody can see it. The view stops while the application reports
+itself occluded, but that gate fails open — it starts animating and only stops on an observed
+transition — and the saving is **unverified**, because a window server that never reports a window
+as visible would never fire the transition either. For a guarantee, pass `paused` or freeze with
+`orbTime`. Reduced motion already renders one static frame.
 
-Run `swift run -c release OrbsSnapshot --bench` to reproduce the geometry figures.
+Run `swift run -c release OrbsSnapshot --bench` for the geometry figures.
 
 ## Layout
 
