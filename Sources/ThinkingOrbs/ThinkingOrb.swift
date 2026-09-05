@@ -17,6 +17,7 @@ public struct ThinkingOrb: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.orbTime) private var frozenTime
+    @ObservedObject private var visibility = OrbVisibility.shared
 
     public init(
         _ state: OrbState = .working,
@@ -51,10 +52,11 @@ public struct ThinkingOrb: View {
         } else if reduceMotion {
             // A single representative frame, at a literal 0.6 — not scaled by the speed.
             canvas(at: OrbClock.reducedMotionTime)
-        } else if paused {
+        } else if paused || !visibility.isVisible {
             // Upstream draws one frame and never starts the loop, so unpausing jumps to the
             // current instant rather than resuming where it stopped. This freezes at the clock as
-            // of the last evaluation, which is the nearest stateless equivalent.
+            // of the last evaluation, which is the nearest stateless equivalent — and because the
+            // clock is absolute, an orb that stopped while hidden comes back in phase.
             canvas(at: OrbClock.now * effectiveSpeed)
         } else {
             TimelineView(.animation) { timeline in

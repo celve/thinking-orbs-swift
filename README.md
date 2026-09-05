@@ -57,6 +57,28 @@ values differ by around 1e-16 — residues decided by the last bit of `sin`, whe
 Darwin's disagree. Three cases fall in that band; they are named in `GoldenVectorTests`, and
 everything else is ordered strictly.
 
+## What it costs
+
+Measured on an M4 at 60Hz, in release, as a percentage of one core:
+
+| | CPU |
+| --- | --- |
+| one orb animating | ~5.8% |
+| nine orbs animating | ~12.5% |
+| any number, frozen with `orbTime` | 0% |
+
+Geometry is a small part of that — the worst state, `composing` at 64pt, rebuilds all 566 dots in
+0.153 ms, which is 0.9% of a core at 60fps. The rest is SwiftUI redrawing and compositing a canvas
+sixty times a second, so the marginal cost of a second orb is far below the first one's.
+
+`TimelineView(.animation)` keeps redrawing a window that is minimised or off screen, so an orb
+left running is a cost that continues when nobody can see it. The view stops animating while the
+application reports itself occluded, but that gate fails open — it starts animating and only stops
+on an observed transition — so a host that wants a guarantee should pass `paused`, or freeze with
+`orbTime`, which measures at zero. Reduced motion already renders one static frame.
+
+Run `swift run -c release OrbsSnapshot --bench` to reproduce the geometry figures.
+
 ## Layout
 
 | Target | Holds |

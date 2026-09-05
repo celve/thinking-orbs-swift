@@ -15,11 +15,17 @@ let scale: CGFloat = 2
 
 let arguments = CommandLine.arguments
 let animate = arguments.contains("--animate")
+let bench = arguments.contains("--bench")
 let positional = arguments.dropFirst().filter { !$0.hasPrefix("--") }
-guard positional.count == 1 else {
+guard positional.count == 1 || bench else {
     FileHandle.standardError.write(
         Data("usage: orbs-snapshot <output-directory> [--animate]\n".utf8))
     exit(2)
+}
+if bench {
+    _ = NSApplication.shared
+    Benchmark.run()
+    exit(0)
 }
 let directory = URL(fileURLWithPath: positional[positional.startIndex])
 try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
