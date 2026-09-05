@@ -10,9 +10,10 @@ extension OrbMode {
         case .wave: frameWave(size: size, t: t, opts: o)
         case .orbits: frameOrbits(size: size, t: t, opts: o)
         case .braid: frameBraid(size: size, t: t, opts: o)
+        case .web: frameWeb(size: size, t: t, opts: o)
+        case .morph: frameMorph(size: size, t: t, opts: o)
         // `ring` is `ribbon` with the `faceOn` flag set, which the preset supplies.
         case .ribbon, .ring: frameRibbon(size: size, t: t, opts: o)
-        case .web, .morph: OrbFrame()
         }
     }
 }

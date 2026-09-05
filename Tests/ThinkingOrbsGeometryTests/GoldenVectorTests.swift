@@ -2,17 +2,17 @@ import Testing
 
 @testable import ThinkingOrbsGeometry
 
-/// Modes still to be transcribed. Each phase removes entries; `unportedModesProduceNothing`
-/// guards the other direction, so a mode cannot half-land and go unnoticed.
-private let unported: Set<OrbMode> = [.web, .morph]
-
-private let portedCases = Golden.cases.filter { !unported.contains($0.mode) }
+/// The only cases where a run of equal recorded depths comes out permuted relative to upstream:
+/// the face-on band of `breathing` at 64, where the projection cancels to a residue of about
+/// 1e-16 and the last bit of `sin` decides the order. See `GoldenComparison`.
+private let knownReordered: Set<String> = [
+    "breathing-64-1.7", "breathing-64-3.3", "breathing-64-5.1",
+]
 
 @Suite struct GoldenVectorTests {
-    /// Every dot of every ported case against the web engine's own output. See `GoldenComparison`
-    /// for the one place ordering is not asserted, and why the fixture cannot assert it.
-    @Test(arguments: portedCases)
-    func dotsMatchTheWebEngine(_ c: GoldenCase) throws {
+    /// Every dot and line of every case against the web engine's own output.
+    @Test(arguments: Golden.cases)
+    func matchesTheWebEngine(_ c: GoldenCase) throws {
         let frame = OrbFrame(state: c.state, size: c.orbSize, at: c.t)
 
         // Before the field comparison: a count mismatch means a wrong loop bound or a wrong
@@ -22,15 +22,15 @@ private let portedCases = Golden.cases.filter { !unported.contains($0.mode) }
             frame.dots.count == c.dotCount,
             "\(c.key): got \(frame.dots.count) dots, want \(c.dotCount)")
 
-        let bad = GoldenComparison.mismatches(frame, c, tolerance: Golden.file.tolerance)
+        let result = GoldenComparison.compare(frame, c, tolerance: Golden.file.tolerance)
         #expect(
-            bad.isEmpty,
-            "\(c.key): \(bad.count) mismatch(es) — \(bad.prefix(3).joined(separator: "; "))")
+            result.mismatches.isEmpty,
+            "\(c.key): \(result.mismatches.count) mismatch(es) — \(result.mismatches.prefix(3).joined(separator: "; "))")
     }
 
-    /// A separate test so a failure names which pass broke. A no-op for the sixty-four cases
-    /// that emit no lines.
-    @Test(arguments: portedCases)
+    /// Separate from the field comparison so a wrong edge count reads as its own failure rather
+    /// than as a wall of shifted line values. A no-op for the sixty-four cases with no edges.
+    @Test(arguments: Golden.cases)
     func lineCountsMatchTheWebEngine(_ c: GoldenCase) throws {
         let frame = OrbFrame(state: c.state, size: c.orbSize, at: c.t)
         #expect(
@@ -38,23 +38,22 @@ private let portedCases = Golden.cases.filter { !unported.contains($0.mode) }
             "\(c.key): got \(frame.lines.count) lines, want \(c.lineCount)")
     }
 
-    /// A mode listed as unported must actually produce nothing, so the filter above can never
-    /// quietly hide a half-finished transcription.
-    @Test func unportedModesProduceNothing() {
-        for c in Golden.cases where unported.contains(c.mode) {
-            let frame = OrbFrame(state: c.state, size: c.orbSize, at: c.t)
-            #expect(frame.dots.isEmpty && frame.lines.isEmpty, "\(c.key) is no longer empty")
+    /// Pins how much of the oracle runs unordered. Everything else is compared strictly, so a new
+    /// entry here would mean a transcription had started drifting, not that libm had.
+    @Test(arguments: Golden.cases)
+    func onlyTheKnownRunsAreComparedAsSets(_ c: GoldenCase) {
+        let frame = OrbFrame(state: c.state, size: c.orbSize, at: c.t)
+        let result = GoldenComparison.compare(frame, c, tolerance: Golden.file.tolerance)
+        if knownReordered.contains(c.key) {
+            #expect(result.reorderedRuns.count == 1, "\(c.key) should need exactly one set match")
+        } else {
+            #expect(
+                result.reorderedRuns.isEmpty,
+                "\(c.key) is newly order-ambiguous at \(result.reorderedRuns)")
         }
     }
 
-    /// The equal-depth exception must stay narrow. If a future change made whole frames tie, the
-    /// comparison would silently stop checking order at all.
-    @Test(arguments: portedCases)
-    func equalDepthRunsAreTheExceptionNotTheRule(_ c: GoldenCase) {
-        let runs = GoldenComparison.depthRuns(c)
-        let tied = runs.filter { $0.count > 1 }.reduce(0) { $0 + $1.count }
-        #expect(
-            tied <= c.dotCount / 2,
-            "\(c.key): \(tied) of \(c.dotCount) dots sit in equal-depth runs")
+    @Test func everyGoldenCaseIsExercised() {
+        #expect(Golden.cases.count == 72)
     }
 }
